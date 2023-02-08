@@ -1,17 +1,16 @@
 public class Register {
-    String name;
-    int value;
-
-    public Register(String name, int value){
+    private String name;
+    private int data = 0;
+    public Register(String name){
         this.name = name;
-        this.value = value;
     }
-
-    public int getValue(){
-        return this.value;
+    public String getName(){
+        return this.name;
     }
-
-    public void setValue(int value){
-        this.value = value;
+    public int getData(){
+        return this.data;
+    }
+    public void setData(int newData){
+        this.data = newData;
     }
 }
