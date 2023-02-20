@@ -11,10 +11,16 @@ public class Mips {
     int pc = 0;
     ArrayList<Instruction> instructions;
     PipelineSim psim;
+    boolean isPsim = false;
+    int instrExecuted = 0;
 
     public Mips(ArrayList<Instruction> instructions, PipelineSim psim){
         this.instructions = instructions;
         this.psim = psim;
+        this.isPsim = true;
+    }
+    public Mips(ArrayList<Instruction> instructions){
+        this.instructions = instructions;
     }
     public void mipsInteractive(){
         Scanner scan = new Scanner(System.in);
@@ -32,7 +38,8 @@ public class Mips {
                 case("c") -> clear();
                 case("s") -> {
                     step();
-                    System.out.println("1 instruction(s) executed");
+                    if(!isPsim) {System.out.println("1 instruction(s) executed");}
+                    else{this.psim.step(true);}
                 }
                 case("r") -> run();
                 case("h") -> help();
@@ -48,7 +55,9 @@ public class Mips {
                     String[] temp = cmd.split(" ");
                     int arg1 = Integer.parseInt(temp[1]);
                     step(arg1);
-                    System.out.println(arg1 + " instruction(s) executed");
+                    if(!isPsim) {
+                        System.out.println(arg1 + " instruction(s) executed");
+                    }
                 }
             }
         }
@@ -70,7 +79,8 @@ public class Mips {
                     case ("c") -> clear();
                     case ("s") -> {
                         step();
-                        System.out.println("1 instruction(s) executed");
+                        if(!isPsim){System.out.println("1 instruction(s) executed");}
+                        else{this.psim.step(true);}
                     }
                     case ("r") -> run();
                     case ("h") -> help();
@@ -86,7 +96,9 @@ public class Mips {
                         String[] temp = cmd.split(" ");
                         int arg1 = Integer.parseInt(temp[1]);
                         step(arg1);
-                        System.out.println(arg1 + " instruction(s) executed");
+                        if(!isPsim) {
+                            System.out.println(arg1 + " instruction(s) executed");
+                        }
                     }
                 }
             }
@@ -117,16 +129,22 @@ public class Mips {
     }
     public void step(){
         this.instructions.get(pc).executeInstruction(this);
-        this.psim.step();
+        this.instrExecuted++;
     }
     public void step(int steps){
         for(int i = 0; i < steps; i++){
             step();
+            this.psim.step(true);
         }
     }
     public void run(){
         while (this.pc < this.instructions.size()){
             step();
+            this.psim.step(false);
+        }
+        if(isPsim){
+            System.out.println("CPI = " + this.psim.cycles/this.instrExecuted +
+                    "   Cycles = " + this.psim.cycles + "   Instructions = " + this.instrExecuted);
         }
     }
     public void help(){

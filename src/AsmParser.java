@@ -138,6 +138,9 @@ public class AsmParser {
     }
 
     public String removeComments(String in){
+        if(in.equals("#")){
+            return "";
+        }
         String[] temp = in.split("#");
         return temp[0];
     }

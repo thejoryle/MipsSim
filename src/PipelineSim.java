@@ -1,24 +1,29 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.Formatter;
+import java.util.Scanner;
 
-public class PipelineSim {
+public class PipelineSim{
     int pc = 0;
     int cycles = 0;
     Mips mips;
     final String[] stages = {"pc", "if/id", "id/exe", "exe/mem", "mem/wb"};
     String[] pipeline = new String[4];
 
-    public void setMips(Mips mips){
-        this.mips = mips;
-    }
-    public void step(){
+    /* True to print pipeline, false otherwise */
+    public void step(boolean print){
         Instruction instr = this.mips.instructions.get(this.pc);
         String op = instr.getOp();
         if(op.equals("lw") && isStall(instr)){
             System.out.println("Stall detected.");
             advance(op);
         }
-        if(!op.equals("beq") && !op.equals("bne")){ // change this to a fall through
+        else if(!op.equals("beq") && !op.equals("bne")){ // change this to a fall through
             advance(op);
+        }
+        if(print){
+            printStep();
         }
     }
     public void advance(String op){
@@ -28,7 +33,6 @@ public class PipelineSim {
         pipeline[0] = op;
         this.pc++; // change this for j instructions
         this.cycles++;
-        printStep();
     }
     public boolean isStall(Instruction instr){
         if(instr.getOp().equals("lw")){
@@ -68,6 +72,7 @@ public class PipelineSim {
         }
         System.out.println();
     }
+    public void setMips(Mips mips){this.mips = mips;}
     public int getPc(){return this.pc;}
     public void setPc(int pc){this.pc = pc;}
 }

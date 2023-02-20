@@ -1,6 +1,6 @@
 import java.io.File;
 
-public class lab3 {
+public class lab4 {
     public static void main(String[] args) {
         String asmPath = args[0];
         String scriptPath;
@@ -18,11 +18,9 @@ public class lab3 {
 
         if(args.length == 1) {
             mips.mipsInteractive();
-            psim.printStep();
         }
         else{
             mips.mipsScript(scriptFile);
-            psim.printStep();
         }
     }
 }
