@@ -1,26 +1,29 @@
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
 
 public class Mips {
-    RegisterFile rf = new RegisterFile();
+    RegisterFile registerFile = new RegisterFile();
     int[] memory = new int[8192];
     int pc = 0;
     ArrayList<Instruction> instructions;
+    PipelineSim psim;
 
-    public Mips(ArrayList<Instruction> instructions){
+    public Mips(ArrayList<Instruction> instructions, PipelineSim psim){
         this.instructions = instructions;
+        this.psim = psim;
     }
-
-    public void runMips(){
+    public void mipsInteractive(){
         Scanner scan = new Scanner(System.in);
         String cmd;
 
         boolean running = true;
-        System.out.print("mips> ");
+
         while(running){
+            System.out.print("mips> ");
             cmd = scan.nextLine();
 
             switch(cmd){
@@ -32,6 +35,7 @@ public class Mips {
                     System.out.println("1 instruction(s) executed");
                 }
                 case("r") -> run();
+                case("h") -> help();
             }
             if(cmd.length() > 1) {
                 if (cmd.charAt(0) == 'm') {
@@ -47,16 +51,54 @@ public class Mips {
                     System.out.println(arg1 + " instruction(s) executed");
                 }
             }
-            System.out.print("mips> ");
         }
     }
-    public void runMips(File infile){
+    public void mipsScript(File infile){
+        try {
+            Scanner scan = new Scanner(infile);
+            String cmd;
 
+            boolean running = true;
+            while (running) {
+                System.out.print("mips> ");
+                cmd = scan.nextLine();
+                System.out.println(cmd);
+
+                switch (cmd) {
+                    case ("q") -> running = false;
+                    case ("d") -> dump();
+                    case ("c") -> clear();
+                    case ("s") -> {
+                        step();
+                        System.out.println("1 instruction(s) executed");
+                    }
+                    case ("r") -> run();
+                    case ("h") -> help();
+                }
+                if (cmd.length() > 1) {
+                    if (cmd.charAt(0) == 'm') {
+                        String[] temp = cmd.split(" ");
+                        int arg1 = Integer.parseInt(temp[1]);
+                        int arg2 = Integer.parseInt(temp[2]);
+                        printMemory(arg1, arg2);
+                    }
+                    if (cmd.charAt(0) == 's') {
+                        String[] temp = cmd.split(" ");
+                        int arg1 = Integer.parseInt(temp[1]);
+                        step(arg1);
+                        System.out.println(arg1 + " instruction(s) executed");
+                    }
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found: " + infile.getPath());
+        }
     }
     public void dump(){
         System.out.println();
         System.out.println("pc = " + this.pc);
-        rf.printAll();
+        this.registerFile.printAll();
+        System.out.println();
     }
     public void printMemory(int first, int last){
         System.out.println();
@@ -67,14 +109,15 @@ public class Mips {
     }
     public void clear(){
         this.pc = 0;
-        for(Register reg : this.rf.registerFile){
+        for(Register reg : this.registerFile.registerFile){
             reg.setData(0);
         }
         Arrays.fill(this.memory, 0);
         System.out.println("\tSimulator reset");
     }
     public void step(){
-        instructions.get(pc).executeInstruction(this);
+        this.instructions.get(pc).executeInstruction(this);
+        this.psim.step();
     }
     public void step(int steps){
         for(int i = 0; i < steps; i++){
@@ -82,11 +125,12 @@ public class Mips {
         }
     }
     public void run(){
-        for(Instruction inst : instructions){
+        while (this.pc < this.instructions.size()){
             step();
         }
     }
     public void help(){
+        System.out.println();
         System.out.println("h = show help");
         System.out.println("d = dump register state");
         System.out.println("s = single step through the program (i.e. execute 1 instruction and stop)");
@@ -95,6 +139,7 @@ public class Mips {
         System.out.println("m num1 num2 = display data memory from location num1 to num2");
         System.out.println("c = clear all registers, memory, and the program counter to 0");
         System.out.println("q = exit the program");
+        System.out.println();
     }
     public void setPc(int newPc){
         this.pc = newPc;
@@ -102,4 +147,5 @@ public class Mips {
     public int getPc(){
         return this.pc;
     }
+    public void nextPc() { this.pc ++;}
 }

@@ -12,29 +12,30 @@ public class RegisterFile {
     }
     public void printAll(){
         int outWidth = 4;
-        for(int j = 0; j < outWidth; j++) {
-            for (int i = 0; i < this.registerFile.length; i++) {
-                System.out.print("$" + this.registerFile[i].getName() + " = " + this.registerFile[i].getData());
-                if(j < 3){
-                    System.out.print("\t");
-                }
+        for(int i = 0; i < this.registerFile.length; i++){
+            System.out.print("$" + this.registerFile[i].getName() + " = " + this.registerFile[i].getData());
+            if((i + 1) % outWidth == 0){
+                System.out.println();
+            } else {
+                System.out.print("    ");
             }
-            System.out.println();
         }
     }
-    public int getDataByName(String registerName){
+    public int getDataByName(String sourceRegister){
         for(Register register : this.registerFile){
-            if(register.getName() == registerName){
+            if(register.getName().equals(sourceRegister)){
                 return register.getData();
             }
         }
-        System.out.println("Failed to find register in register file.");
+        System.out.println("Failed to find " + sourceRegister + " in register file.");
         return -1;
     }
-    public void setDataByName(String registerName, int data){
+    public void setDataByName(String destinationRegister, int data){
         for(Register register : this.registerFile){
-            if(register.getName() == registerName){
+            if(register.getName().equals(destinationRegister)){
                 register.setData(data);
+//                System.out.println("Data in register " + registerName + " should now be " + data);
+//                System.out.println("The data is actually " + register.getData());
             }
         }
     }

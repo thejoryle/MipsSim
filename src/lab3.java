@@ -12,13 +12,17 @@ public class lab3 {
         }
 
         AsmParser parser = new AsmParser();
-        Mips mips = new Mips(parser.parseAssembly(asmFile));
+        PipelineSim psim = new PipelineSim();
+        Mips mips = new Mips(parser.parseAssembly(asmFile), psim);
+        psim.setMips(mips);
 
         if(args.length == 1) {
-            mips.runMips();
+            mips.mipsInteractive();
+            psim.printStep();
         }
         else{
-            mips.runMips(scriptFile);
+            mips.mipsScript(scriptFile);
+            psim.printStep();
         }
     }
 }

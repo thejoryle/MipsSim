@@ -10,14 +10,20 @@ public class JFormat implements Instruction{
         this.address = address;
     }
     public void executeInstruction(Mips mips){
+//        System.out.println("Executing: " + this);
         switch(this.opcode){
-            case("j") -> mips.setPc(this.address);
-            case("jal") -> {
-                mips.rf.setDataByName("ra", mips.getPc() + 1);
+            case("j") -> {
                 mips.setPc(this.address);
             }
+            case("jal") -> {
+                mips.registerFile.setDataByName("ra", mips.getPc() + 1);
+                mips.setPc(this.address);
+            }
+            default -> System.out.println("JFormat instr failed to execute.");
         }
     }
+    public String getOp(){return this.opcode;}
+
     @Override
     public String toString(){
         return this.opcode + " " + address;

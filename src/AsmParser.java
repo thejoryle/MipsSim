@@ -18,7 +18,7 @@ public class AsmParser {
             while (scan.hasNext()) {
                 String line = scan.nextLine();
                 line = removeComments(line);
-                line = removeSpaces(line);
+                line = line.replaceAll(" ", "");
 
                 // only read lines with a colon, indicating a label, while ignoring comments
                 if (!line.equals("") && line.charAt(0) != '#' && line.contains(":")) {
@@ -37,13 +37,14 @@ public class AsmParser {
     }
 
     /**
-     * Parses an input file (hopefully of MIPS assembly code), converts it to
-     * binary, and outputs it to the output stream. Only supports certain operations
+     * Parses an input file (hopefully of MIPS assembly code), constructs instruction
+     * objects representing each instruction, puts them sequentially into an arrayList,
+     * then returns the arrayList. Only supports certain operations
      * and registers. See asm2binConversion.java for details.
      *
-     * @param infile an input file
-     * @return an arraylist of instruction objects constructed from the file
-     *         being parsed
+     * @param infile an input file, intended to be a .asm file
+     * @return an arraylist of instruction objects representing the instructions
+     * of infile
      */
     public ArrayList<Instruction> parseAssembly(File infile){
         ArrayList<Instruction> instructions = new ArrayList<>();
@@ -71,7 +72,8 @@ public class AsmParser {
                         instr = line.split(" ");
                         instr[1] = instr[1].strip();
                     } else {
-                        line = removeSpaces(line);
+                        line = line.replaceAll(" ", "");
+                        line = line.replaceAll("\\t", "");
                         //temp1 holds the opcode in index 0 and all else (registers/immediates) in index 1
                         String[] temp1 = line.split("\\$", 2);
                         //remove '$' from registers then split them into their own strings
@@ -89,25 +91,27 @@ public class AsmParser {
                         if (a.op2format(instr[0]) == 'r') {
                             Instruction inst = new RFormat(instr);
                             instructions.add(inst);
+//                            System.out.println("Added to inst mem: " + inst);
                             address++;
                         }
                         //I-format instruction
                         else if (a.op2format(instr[0]) == 'i') {
                             //replace labels with addresses for branch instructions
                             if(Objects.equals(instr[0], "beq") || Objects.equals(instr[0], "bne")){
-                                int imm = labels.get(instr[3]) - address - 1;
+                                int imm = labels.get(instr[3]) - address;
                                 instr[3] = Integer.toString(imm);
                             }
                             Instruction inst = new IFormat(instr);
                             instructions.add(inst);
+//                            System.out.println("Added to inst mem: " + inst);
                             address++;
                         }
                         //J-format instruction
                         else if (a.op2format(instr[0]) == 'j') {
-                            int location = -99999999;
+                            int location;
                             //spaces weren't removed earlier so do it now
                             for(String s: instr){
-                                s = removeSpaces(s);
+                                s = s.replaceAll(" ", "");
                             }
                             //get address of label from first pass
                             if (labels.containsKey(instr[1])) {
@@ -118,6 +122,7 @@ public class AsmParser {
                             }
                             Instruction inst = new JFormat(instr[0], location);
                             instructions.add(inst);
+//                            System.out.println("Added to inst mem: " + inst);
                             address++;
                         } else {
                             System.out.println("invalid instruction: " + instr[0]);
@@ -144,21 +149,5 @@ public class AsmParser {
             return temp[1];
         }
         else { return ""; }
-    }
-
-    /**
-     * Removes in-line whitespace (spaces and tabs) from input string.
-     *
-     * @param in String input.
-     * @return The input string without whitespace.
-     */
-    public String removeSpaces(String in){
-        String res = "";
-        for(char c : in.toCharArray()){
-            if(c != ' ' && c != '\t'){
-                res = res + c;
-            }
-        }
-        return res;
     }
 }

@@ -6,6 +6,7 @@ public class IFormat implements Instruction{
     String rs;
     String rt;
     int immediate;
+    boolean squash = false;
     asm2binConversion converter = new asm2binConversion();
 
     public IFormat(String[] instruction){
@@ -27,20 +28,52 @@ public class IFormat implements Instruction{
         }
     }
     public void executeInstruction(Mips mips){
-        RegisterFile rf = mips.rf;
+//        System.out.println("Executing: " + this);
         switch(this.opcode){
-            case("add") -> rf.setDataByName(this.rt, this.addi(rf.getDataByName(this.rs), rf.getDataByName(this.rt)));
-            case ("bne") -> { if(rf.getDataByName(this.rs) != rf.getDataByName(this.rt)) { mips.setPc(immediate);} }
-            case ("beq") -> { if(rf.getDataByName(this.rs) == rf.getDataByName(this.rt)) { mips.setPc(immediate);} }
-            case("sw") -> mips.memory[rf.getDataByName(this.rs)] = rf.getDataByName(this.rt);
-            case("lw") -> rf.setDataByName(this.rt ,mips.memory[rf.getDataByName(this.rs) + this.immediate]);
+            case("addi") -> {
+                //rt = rs + imm
+                mips.registerFile.setDataByName(this.rt, this.addi(mips.registerFile.getDataByName(this.rs), this.immediate));
+                mips.nextPc();
+            }
+            case ("bne") -> {
+                // if rs != rt, pc = imm; else, pc = pc+1
+                if(mips.registerFile.getDataByName(this.rs) != mips.registerFile.getDataByName(this.rt)) {
+                    mips.setPc(mips.getPc() + this.immediate);
+                    this.squash = true;
+                } else {
+                mips.nextPc();
+                }
+            }
+            case ("beq") -> {
+                // if rs != rt, pc = imm; else, pc = pc+1
+                if(mips.registerFile.getDataByName(this.rs) == mips.registerFile.getDataByName(this.rt)) {
+                    mips.setPc(mips.getPc() + immediate);
+                    this.squash = true;
+                } else {
+                mips.nextPc();
+                }
+            }
+            case("sw") -> {
+                // M[rs+imm] = rt
+                mips.memory[mips.registerFile.getDataByName(this.rs) + immediate] = mips.registerFile.getDataByName(this.rt);
+                mips.nextPc();
+            }
+            case("lw") -> {
+                // rt = M[rs+imm]
+                mips.registerFile.setDataByName(this.rt ,mips.memory[mips.registerFile.getDataByName(this.rs) + this.immediate]);
+                mips.nextPc();
+            }
+            default -> System.out.println("IFormat instr failed to execute.");
         }
     }
     public int addi(int rs, int immediate){ return rs + immediate;}
+    public String getOp(){return this.opcode;}
+    public String getRs(){return this.rs;}
+    public String getRt(){return this.rt;}
 
     @Override
     public String toString(){
-        return this.opcode + " " + this.rs + ", " + this.rt + ", " + immediate;
+        return this.opcode + " " + this.rs + " " + this.rt + " " + immediate;
     }
     public void printBinary(){
         Map<String, String> conv = converter.asm2binConversion();

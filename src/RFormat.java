@@ -15,32 +15,59 @@ public class RFormat implements Instruction{
         this.opcode = instruction[0];
 
         //jr special case
-        if(!Objects.equals(this.opcode, "jr")) {
+        if(Objects.equals(this.opcode, "jr")) {
+            this.rs = instruction[1];
+        } else{
             this.rd = instruction[1];
             //set shamt for sll
             if(Objects.equals(this.opcode, "sll")){
                 this.rt = instruction[2];
                 this.shamt = Integer.parseInt(instruction[3]);
-            } else{
+            } else {
                 if(!Objects.equals(this.opcode, "jr")) {
                     this.rs = instruction[2];
                     this.rt = instruction[3];
                 }
             }
-        } else {
-            this.rs = instruction[1];
         }
     }
     public void executeInstruction(Mips mips) {
-        RegisterFile rf = mips.rf;
+//        System.out.println("Executing: " + this);
+        RegisterFile rf = mips.registerFile;
         switch(this.opcode){
-            case("add") -> rf.setDataByName(this.rd, this.add(rf.getDataByName(this.rs), rf.getDataByName(this.rt)));
-            case("and") -> rf.setDataByName(this.rd, this.and(rf.getDataByName(this.rs), rf.getDataByName(this.rt)));
-            case("or") -> rf.setDataByName(this.rd, this.or(rf.getDataByName(this.rs), rf.getDataByName(this.rt)));
+            // rd = rs + rt
+            case("add") -> {
+                rf.setDataByName(this.rd, this.add(rf.getDataByName(this.rs), rf.getDataByName(this.rt)));
+                mips.nextPc();
+            }
+            // rd = rs & rt
+            case("and") -> {
+                rf.setDataByName(this.rd, this.and(rf.getDataByName(this.rs), rf.getDataByName(this.rt)));
+                mips.nextPc();
+            }
+            // rd = rs | rt
+            case("or") -> {
+                rf.setDataByName(this.rd, this.or(rf.getDataByName(this.rs), rf.getDataByName(this.rt)));
+                mips.nextPc();
+            }
+            // pc = rs
             case("jr") -> mips.setPc(rf.getDataByName(this.rs));
-            case("slt") -> rf.setDataByName(this.rd, this.slt(rf.getDataByName(this.rs), rf.getDataByName(this.rt)));
-            case("sll") -> rf.setDataByName(this.rd, this.sll(rf.getDataByName(this.rs)));
-            case("sub") -> rf.setDataByName(this.rd, this.sub(rf.getDataByName(this.rs), rf.getDataByName(this.rt)));
+            // rd = rs < rt ? 1 : 0
+            case("slt") -> {
+                rf.setDataByName(this.rd, this.slt(rf.getDataByName(this.rs), rf.getDataByName(this.rt)));
+                mips.nextPc();
+            }
+            // rd = rs << shamt
+            case("sll") -> {
+                rf.setDataByName(this.rd, this.sll(rf.getDataByName(this.rs)));
+                mips.nextPc();
+            }
+            // rd = rs - rt
+            case("sub") -> {
+                rf.setDataByName(this.rd, this.sub(rf.getDataByName(this.rs), rf.getDataByName(this.rt)));
+                mips.nextPc();
+            }
+            default -> System.out.println("RFormat inst failed to execute.");
         };
     }
     public int add(int rs, int rt){
@@ -62,9 +89,12 @@ public class RFormat implements Instruction{
     public int sub(int rs, int rt){
         return rs - rt;
     }
+    public String getOp(){return this.opcode;}
+    public String getRs(){return this.rs;}
+    public String getRt(){return this.rt;}
     @Override
     public String toString(){
-        return opcode + " $" + this.rd + ", $" + this.rs + ", $" + this.rd;
+        return opcode + " " + this.rd + " " + this.rs + " " + this.rt;
     }
     public void printBinary(){
         Map<String, String> conv = this.converter.asm2binConversion();
