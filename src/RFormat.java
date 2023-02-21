@@ -7,6 +7,7 @@ public class RFormat implements Instruction{
     String rt = "";
     String rd = "";
     int shamt = 0;
+    boolean squash = false;
     asm2binConversion converter = new asm2binConversion();
 
     //Create the instruction given its entire instruction parsed into its sub-parts
@@ -51,7 +52,10 @@ public class RFormat implements Instruction{
                 mips.nextPc();
             }
             // pc = rs
-            case("jr") -> mips.setPc(rf.getDataByName(this.rs));
+            case("jr") -> {
+                mips.setPc(rf.getDataByName(this.rs));
+                squash = true;
+            }
             // rd = rs < rt ? 1 : 0
             case("slt") -> {
                 rf.setDataByName(this.rd, this.slt(rf.getDataByName(this.rs), rf.getDataByName(this.rt)));
@@ -92,6 +96,7 @@ public class RFormat implements Instruction{
     public String getOp(){return this.opcode;}
     public String getRs(){return this.rs;}
     public String getRt(){return this.rt;}
+    public boolean squash(){return this.squash;}
     @Override
     public String toString(){
         return opcode + " " + this.rd + " " + this.rs + " " + this.rt;

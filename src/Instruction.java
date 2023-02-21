@@ -5,4 +5,5 @@ public interface Instruction{
     void printBinary();
     void executeInstruction(Mips mips);
     String getOp();
+    boolean squash();
 }

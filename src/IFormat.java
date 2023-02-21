@@ -70,6 +70,7 @@ public class IFormat implements Instruction{
     public String getOp(){return this.opcode;}
     public String getRs(){return this.rs;}
     public String getRt(){return this.rt;}
+    public boolean squash(){return this.squash;}
 
     @Override
     public String toString(){

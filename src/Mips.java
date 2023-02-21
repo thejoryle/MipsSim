@@ -138,13 +138,14 @@ public class Mips {
         }
     }
     public void run(){
-        while (this.pc < this.instructions.size()){
+        while(this.pc < this.instructions.size()){
             step();
             this.psim.step(false);
         }
         if(isPsim){
-            System.out.println("CPI = " + this.psim.cycles/this.instrExecuted +
-                    "   Cycles = " + this.psim.cycles + "   Instructions = " + this.instrExecuted);
+            this.psim.setCycles(this.psim.getCycles() + 5);
+            System.out.printf("CPI = %.4f  Cycles = %d  Instructions = %d\n",
+                    ((float)this.psim.getCycles())/ this.instrExecuted, this.psim.getCycles(), this.instrExecuted);
         }
     }
     public void help(){
