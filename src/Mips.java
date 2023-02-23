@@ -141,6 +141,7 @@ public class Mips {
             reg.setData(0);
         }
         Arrays.fill(this.memory, 0);
+        instrExecuted = 0;
         System.out.println("\tSimulator reset");
     }
     public void step(){

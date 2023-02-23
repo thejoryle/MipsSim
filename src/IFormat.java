@@ -36,6 +36,7 @@ public class IFormat implements Instruction{
                 mips.nextPc();
             }
             case ("bne") -> {
+                this.squash = false;
                 // if rs != rt, pc = imm; else, pc = pc+1
                 if(mips.registerFile.getDataByName(this.rs) != mips.registerFile.getDataByName(this.rt)) {
                     mips.setPc(mips.getPc() + this.immediate);
@@ -45,6 +46,7 @@ public class IFormat implements Instruction{
                 }
             }
             case ("beq") -> {
+                this.squash = false;
                 // if rs == rt, pc = imm; else, pc = pc+1
                 if(mips.registerFile.getDataByName(this.rs) == mips.registerFile.getDataByName(this.rt)) {
                     mips.setPc(mips.getPc() + immediate);

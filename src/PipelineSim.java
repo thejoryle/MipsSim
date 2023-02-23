@@ -54,9 +54,7 @@ public class PipelineSim{
                 }
                 cycle(op);
                 this.pc++;
-                if (cyclesToSquash > 0) {
-                    cyclesToSquash--;
-                }
+                cyclesToSquash--;
                 if (cyclesToStall > 0) {
                     cyclesToStall--;
                 }
@@ -115,6 +113,7 @@ public class PipelineSim{
             System.out.printf("%9s", s);
         }
         System.out.println();
+        System.out.println("Mips PC: " + mips.pc);
         System.out.println("PC: " + pc + ", Cycles: " + cycles);
     }
     public void clear(){
