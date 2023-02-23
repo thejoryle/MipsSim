@@ -45,7 +45,7 @@ public class IFormat implements Instruction{
                 }
             }
             case ("beq") -> {
-                // if rs != rt, pc = imm; else, pc = pc+1
+                // if rs == rt, pc = imm; else, pc = pc+1
                 if(mips.registerFile.getDataByName(this.rs) == mips.registerFile.getDataByName(this.rt)) {
                     mips.setPc(mips.getPc() + immediate);
                     this.squash = true;

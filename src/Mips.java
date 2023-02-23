@@ -35,7 +35,17 @@ public class Mips {
             switch(cmd){
                 case("q") -> running = false;
                 case("d") -> dump();
-                case("c") -> clear();
+                case("p") ->{
+                    if(isPsim){
+                        psim.printStep();
+                    }
+                }
+                case("c") -> {
+                    clear();
+                    if(isPsim){
+                        psim.clear();
+                    }
+                }
                 case("s") -> {
                     step();
                     if(!isPsim) {System.out.println("1 instruction(s) executed");}
@@ -55,9 +65,7 @@ public class Mips {
                     String[] temp = cmd.split(" ");
                     int arg1 = Integer.parseInt(temp[1]);
                     step(arg1);
-                    if(!isPsim) {
-                        System.out.println(arg1 + " instruction(s) executed");
-                    }
+                    if(!isPsim){System.out.println(arg1 + " instruction(s) executed");}
                 }
             }
         }
@@ -76,7 +84,17 @@ public class Mips {
                 switch (cmd) {
                     case ("q") -> running = false;
                     case ("d") -> dump();
-                    case ("c") -> clear();
+                    case("p") ->{
+                        if(isPsim){
+                            psim.printStep();
+                        }
+                    }
+                    case ("c") -> {
+                        clear();
+                        if(isPsim){
+                            psim.clear();
+                        }
+                    }
                     case ("s") -> {
                         step();
                         if(!isPsim){System.out.println("1 instruction(s) executed");}
@@ -96,9 +114,7 @@ public class Mips {
                         String[] temp = cmd.split(" ");
                         int arg1 = Integer.parseInt(temp[1]);
                         step(arg1);
-                        if(!isPsim) {
-                            System.out.println(arg1 + " instruction(s) executed");
-                        }
+                        if(!isPsim){System.out.println("1 instruction(s) executed");}
                     }
                 }
             }
@@ -128,8 +144,11 @@ public class Mips {
         System.out.println("\tSimulator reset");
     }
     public void step(){
-        this.instructions.get(pc).executeInstruction(this);
-        this.instrExecuted++;
+        if(pc < instructions.size() &&
+        (!isPsim || (!psim.isSquashed() && !psim.isJsquashed() && !psim.isStalled()))) {
+            this.instructions.get(pc).executeInstruction(this);
+            this.instrExecuted++;
+        }
     }
     public void step(int steps){
         for(int i = 0; i < steps; i++){
@@ -138,12 +157,17 @@ public class Mips {
         }
     }
     public void run(){
-        while(this.pc < this.instructions.size()){
-            step();
-            this.psim.step(false);
+        if(!isPsim) {
+            while(this.pc < this.instructions.size()) {
+                step();
+            }
         }
-        if(isPsim){
-            this.psim.setCycles(this.psim.getCycles() + 5);
+        else{
+            while (this.psim.getPc() < this.instructions.size()) {
+                step();
+                this.psim.step(false);
+            }
+            this.psim.setCycles(this.psim.getCycles() + 4);
             System.out.printf("CPI = %.4f  Cycles = %d  Instructions = %d\n",
                     ((float)this.psim.getCycles())/ this.instrExecuted, this.psim.getCycles(), this.instrExecuted);
         }
@@ -152,8 +176,11 @@ public class Mips {
         System.out.println();
         System.out.println("h = show help");
         System.out.println("d = dump register state");
-        System.out.println("s = single step through the program (i.e. execute 1 instruction and stop)");
-        System.out.println("s num = step through num instructions of the program");
+        if(isPsim) {
+            System.out.println("p = show pipeline registers");
+        }
+        System.out.println("s = step through a single clock cycle step (i.e. simulate 1 cycle and stop)");
+        System.out.println("s num = step through num clock cycles");
         System.out.println("r = run until the program ends");
         System.out.println("m num1 num2 = display data memory from location num1 to num2");
         System.out.println("c = clear all registers, memory, and the program counter to 0");

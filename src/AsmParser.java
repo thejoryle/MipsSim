@@ -91,7 +91,6 @@ public class AsmParser {
                         if (a.op2format(instr[0]) == 'r') {
                             Instruction inst = new RFormat(instr);
                             instructions.add(inst);
-//                            System.out.println("Added to inst mem: " + inst);
                             address++;
                         }
                         //I-format instruction
@@ -103,7 +102,6 @@ public class AsmParser {
                             }
                             Instruction inst = new IFormat(instr);
                             instructions.add(inst);
-//                            System.out.println("Added to inst mem: " + inst);
                             address++;
                         }
                         //J-format instruction
@@ -122,7 +120,6 @@ public class AsmParser {
                             }
                             Instruction inst = new JFormat(instr[0], location);
                             instructions.add(inst);
-//                            System.out.println("Added to inst mem: " + inst);
                             address++;
                         } else {
                             System.out.println("invalid instruction: " + instr[0]);

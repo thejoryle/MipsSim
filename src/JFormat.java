@@ -4,7 +4,7 @@ public class JFormat implements Instruction{
     String opcode;
     int address;
     asm2binConversion converter = new asm2binConversion();
-    boolean squash = false;
+    boolean squash = true;
 
     public JFormat(String opcode, int address){
         this.opcode = opcode;
@@ -13,14 +13,11 @@ public class JFormat implements Instruction{
     public void executeInstruction(Mips mips){
 //        System.out.println("Executing: " + this);
         switch(this.opcode){
-            case("j") -> {
+            case("j") ->
                 mips.setPc(this.address);
-                squash = true;
-            }
             case("jal") -> {
                 mips.registerFile.setDataByName("ra", mips.getPc() + 1);
                 mips.setPc(this.address);
-                squash = true;
             }
             default -> System.out.println("JFormat instr failed to execute.");
         }
